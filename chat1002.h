@@ -56,4 +56,25 @@ void knowledge_reset();
 int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
 
+/* BST node */
+typedef struct node
+{
+    char entity[MAX_ENTITY];        // the entity (key for the BST)
+    char response[MAX_RESPONSE];    // the response for this entity
+    struct node *right_child;       // right child
+    struct node *left_child;        // left child
+} KB_NODE;
+
+/* root pointers for WHERE, WHAT and WHO trees */
+KB_NODE *WHERE_root;
+KB_NODE *WHAT_root;
+KB_NODE *WHO_root;
+
+/* functions defined in bst.c */
+KB_NODE *search(KB_NODE *root, const char *entity);
+KB_NODE *create_new_node(const char *entity, const char *response);
+int insert(KB_NODE *root, const char *entity, const char *response);
+int in_order(KB_NODE *root);
+int bst_tests();
+
 #endif

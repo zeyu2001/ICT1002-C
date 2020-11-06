@@ -16,11 +16,14 @@
 /* word delimiters */
 const char *delimiters = " ?\t\n";
 
-
 /*
  * Main loop.
  */
 int main(int argc, char *argv[]) {
+
+	/* Uncomment to run tests on bst.c */
+	bst_tests();
+	KB_NODE *WHAT_root, *WHERE_root, *WHO_root = NULL;
 
 	char input[MAX_INPUT];      /* buffer for holding the user input */
 	int inc;                    /* the number of words in the user input */

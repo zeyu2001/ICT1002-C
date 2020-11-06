@@ -194,7 +194,7 @@ int chatbot_is_question(const char *intent) {
 
 	/* to be implemented */
 
-	return 0;
+	return 1;
 
 }
 
@@ -214,10 +214,23 @@ int chatbot_is_question(const char *intent) {
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 
-	/* to be implemented */
+	/* TEST STUB */
+	knowledge_put("WHO", "Frank Guan", "Frank teaches the C section of ICT1002.");
 
+	// NOT IMPLEMENTED YET
+
+	char entity[MAX_ENTITY];
+	strcpy(entity, inv[2]);
+
+	int i = 3;
+	while (inv[i] != NULL)
+	{
+		strcat(entity, " ");
+		strcat(entity, inv[i]);
+		i++;
+	}
+	knowledge_get(inv[0], entity, response, MAX_RESPONSE);
 	return 0;
-
 }
 
 

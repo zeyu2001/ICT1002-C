@@ -18,6 +18,41 @@
 #include "chat1002.h"
 
 /*
+ * Get the root of the relevant BST, given the intent.
+ * 
+ * Input:
+ * 	 intent		- the question word
+ * 
+ * Returns:
+ * 	 the root of the BST corresponding to the intent, if valid
+ *   KB_INVALID, if 'intent' is not a recognised question word
+ */
+KB_NODE **get_root(const char *intent)
+{
+	KB_NODE **root;
+
+	if (compare_token(intent, "WHERE") == 0)
+	{	
+		root = &WHERE_root;
+	}
+	else if (compare_token(intent, "WHAT") == 0)
+	{
+		root = &WHAT_root;
+	}
+	else if (compare_token(intent, "WHO") == 0)
+	{
+		root = &WHO_root;
+	}
+	else
+	{
+		// Not a valid question word
+		root = NULL;
+	}
+	return root;
+}
+
+
+/*
  * Get the response to a question.
  *
  * Input:
@@ -33,10 +68,27 @@
  */
 int knowledge_get(const char *intent, const char *entity, char *response, int n) {
 
-	/* to be implemented */
+	/* Identify the intent */
+	KB_NODE **root = get_root(intent);
 
-	return KB_NOTFOUND;
+	// Not a valid question word
+	if (root == NULL)
+	{
+		return KB_INVALID;
+	}
 
+	KB_NODE *node = search(*root, entity);
+
+	// Not found
+	if (node == NULL)
+	{
+		return KB_NOTFOUND;
+	}
+	else
+	{
+		snprintf(response, MAX_RESPONSE, "%s", node->response);;
+		return KB_OK;
+	}
 }
 
 
@@ -57,10 +109,28 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
  */
 int knowledge_put(const char *intent, const char *entity, const char *response) {
 
-	/* to be implemented */
+	/* Identify the intent */
+	KB_NODE **root = get_root(intent);
 
-	return KB_INVALID;
+	// Not a valid question word
+	if (root == NULL)
+	{
+		return KB_INVALID;
+	}
 
+	// Empty tree (set root to new node)
+	if (*root == NULL)
+	{
+		*root = create_new_node(entity, response);
+	}
+
+	// Non-empty tree (insert new node into BST)
+	else
+	{
+		int status = insert(*root, entity, response);	
+		return status;
+	}
+	return KB_OK;
 }
 
 
