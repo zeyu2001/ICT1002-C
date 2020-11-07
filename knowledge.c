@@ -86,7 +86,7 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
 	}
 	else
 	{
-		snprintf(response, MAX_RESPONSE, "%s", node->response);;
+		snprintf(response, MAX_RESPONSE, "%s", node->response);
 		return KB_OK;
 	}
 }

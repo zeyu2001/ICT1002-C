@@ -229,7 +229,15 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 		strcat(entity, inv[i]);
 		i++;
 	}
-	knowledge_get(inv[0], entity, response, MAX_RESPONSE);
+	int status = knowledge_get(inv[0], entity, response, MAX_RESPONSE);
+	if (status == KB_INVALID)
+	{
+		snprintf(response, MAX_RESPONSE, "%s", "Invalid question.");
+	}
+	else if (status == KB_NOTFOUND)
+	{
+		snprintf(response, MAX_RESPONSE, "%s", "Not found.");
+	}
 	return 0;
 }
 
@@ -264,12 +272,14 @@ int chatbot_is_reset(const char *intent) {
  */
 int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
 
-	if (chatbot_is_reset(inv[0])
-	    return 0;
-	else{
-		printf("Resetting")
+	if (chatbot_is_reset(inv[0]))
+	{
+		return 0;
 	}
-
+	else
+	{
+		printf("Resetting");
+	}
 	return 0;
 
 }
