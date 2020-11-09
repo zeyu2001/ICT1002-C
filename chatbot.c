@@ -392,10 +392,10 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 		} else if (compare_token("joke", inv[inc-1]) == 0) {
 			switch(chosen_resp) {
 				case 0:
-					snprintf(response, n, "I don't like comic books, they have too many issues");
+					snprintf(response, n, "I don't like comic books, they have too many issues.");
 					break;
 				case 1:
-					snprintf(response, n, "I was once asked what drove me to be a programmer. I replied, Grab");
+					snprintf(response, n, "I was once asked what drove me to be a programmer. I replied, Grab.");
 					break;
 			}
 		} else {
