@@ -42,6 +42,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "chat1002.h"
 
 
@@ -337,8 +338,11 @@ int chatbot_is_smalltalk(const char *intent) {
 
 	/* to be implemented */
 
-	return 0;
-
+	return compare_token("Hello", intent) == 0 ||
+		compare_token("It's", intent) == 0 ||
+		compare_token("Good", intent) == 0 ||
+		compare_token("Goodbye", intent) == 0 ||
+		compare_token("Tell", intent) == 0;
 }
 
 
@@ -353,9 +357,51 @@ int chatbot_is_smalltalk(const char *intent) {
  *   1, if the chatbot should stop chatting (e.g. the smalltalk was "goodbye" etc.)
  */
 int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
-
-	/* to be implemented */
-
+	if (compare_token("Hello", inv[0]) == 0) {
+		snprintf(response, n, "Hellooooooooo :)");
+	} else if (compare_token("It's", inv[0]) == 0){
+		snprintf(response, n, "That is so!");
+	} else if (compare_token("Good", inv[0]) == 0){
+		snprintf(response, n, "Excellent %s", inv[1]);
+	} else if (compare_token("Goodbye", inv[0]) == 0){
+		snprintf(response, n, "Have an excellent day!");\
+		return 1;
+	} else if (compare_token("Tell", inv[0]) == 0){
+		int chosen_resp = rand() % 2;
+		char answer[MAX_RESPONSE];
+		memset(answer, 0, MAX_RESPONSE);
+		if (compare_token("riddle", inv[inc-1]) == 0) {
+			switch(chosen_resp) {
+				case 0:
+					prompt_user(answer, MAX_RESPONSE, "When is a door not a door?");
+					if (compare_token("When it is a jar", answer) != 0) {
+						snprintf(response, n, "Actually... the answer was 'when it is a jar'. HAHA!!!!!");
+					} else {
+						snprintf(response, n, "You are right! Excellent job!");
+					}
+					break;
+				case 1:
+					prompt_user(answer, MAX_RESPONSE, "Not chest or box is now discussed. Money can be held in it, but just as we test its metal, within it there is rust?");
+					if (compare_token("Trust", answer) != 0) {
+						snprintf(response, n, "Actually... the answer was 'trust'. HAHA!!!!!");
+					} else {
+						snprintf(response, n, "You are right! Excellent job!");
+					}
+					break;
+			}
+		} else if (compare_token("joke", inv[inc-1]) == 0) {
+			switch(chosen_resp) {
+				case 0:
+					snprintf(response, n, "I don't like comic books, they have too many issues");
+					break;
+				case 1:
+					snprintf(response, n, "I was once asked what drove me to be a programmer. I replied, Grab");
+					break;
+			}
+		} else {
+			snprintf(response, n, "Sorry, I can only tell you jokes or riddles!");
+		}
+	}
 	return 0;
 
 }
