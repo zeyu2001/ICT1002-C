@@ -248,10 +248,11 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	}
 	else if (status == KB_NOTFOUND)
 	{
-		snprintf(response, MAX_RESPONSE, "%s", question);
+		char input[MAX_RESPONSE];
+		prompt_user(input, MAX_RESPONSE, "%s", question);
+		knowledge_put(inv[0], entity, input);
 
-		//prepare intent to record response for entity
-		knowledge_put(inv[0], entity, "");
+		snprintf(response, MAX_RESPONSE, "%s", "Thank you.");
 	}
 	return 0;
 }
@@ -329,44 +330,6 @@ int chatbot_is_save(const char *intent) {
  *   0 (the chatbot always continues chatting after saving knowledge)
  */
 int chatbot_do_save(int inc, char *inv[], char *response, int n) {
-
-	/* NOT FINISHED, DOES NOT SAVE TO FILE */
-
-	//craft entity to be identified with
-	char entity[MAX_ENTITY];
-	strcpy(entity, inv[1]);
-	int i = 2;
-	while (inv[i] != NULL)
-	{
-		if(compare_token("is" ,inv[i]) || compare_token("are" ,inv[i]))
-			break;
-		strcat(entity, " ");
-		strcat(entity, inv[i]);
-		i++;
-	}
-
-	//craft answer to be recorded
-	char answer[MAX_RESPONSE];
-	strcpy(answer, entity);
-	while (inv[i] != NULL)
-	{
-		strcat(answer, " ");
-		strcat(answer, inv[i]);
-		i++;
-	}
-	
-	// search root intents for existing entity
-	KB_NODE* WHO = search(WHO_root, entity);
-	KB_NODE* WHAT = search(WHAT_root, entity);
-	KB_NODE* WHERE = search(WHERE_root, entity);
-
-	// record response to chatbot root
-	if(WHO != NULL)
-		strcpy(WHO->response, answer);
-	else if(WHAT != NULL)
-		strcpy(WHAT->response, answer);
-	else if(WHERE != NULL)
-		strcpy(WHERE->response, answer);
 
 	// thank the user, you fool
 	snprintf(response, MAX_RESPONSE, "%s", "Thank you.");
