@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "chat1002.h"
 
 /* word delimiters */
@@ -21,9 +22,12 @@ const char *delimiters = " ?\t\n";
  */
 int main(int argc, char *argv[]) {
 
-	/* Uncomment to run tests on bst.c */
-	bst_tests();
+	/* Initialise the BST */
+	bst_tests();				/* Uncomment to run tests on bst.c */
 	KB_NODE *WHAT_root, *WHERE_root, *WHO_root = NULL;
+	
+	/* Initialize the pseudo-RNG */
+	srand(time(NULL));			/* Seed with time of execution */
 
 	char input[MAX_INPUT];      /* buffer for holding the user input */
 	int inc;                    /* the number of words in the user input */
