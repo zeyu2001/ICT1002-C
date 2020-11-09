@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
 	do {
 
 		do {
+			
 			/* read the line */
 			printf("%s: ", chatbot_username());
 			fgets(input, MAX_INPUT, stdin);
