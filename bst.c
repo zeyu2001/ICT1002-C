@@ -2,10 +2,45 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 #include "chat1002.h"
 
+
+/*
+ * Find the absolute ASCII difference between two strings. 
+ * Used for finding the closest match in the BST if a match is not found.
+ * 
+ * Input:
+ *   str1       - the first string
+ *   str2       - the second string
+ * 
+ * Returns:
+ *   the absolute ASCII difference between str1 and str2.
+ */
+int get_ascii_difference(const char *str1, const char *str2)
+{
+    int str1_ascii = 0;
+    int str2_ascii = 0;
+
+    int i = 0;
+    while(str1[i] != '\0')
+    {
+        str1_ascii += (int) tolower(str1[i++]);
+    }
+
+    int j = 0;
+    while(str2[j] != '\0')
+    {
+        str2_ascii += (int) tolower(str2[j++]);
+    }
+
+    return abs(str1_ascii - str2_ascii);
+}
+
+
 /* 
- * Iteratively searches for the node with <entity>.
+ * Iteratively searches for the node with <entity>. If <entity> is not found, 
+ * the closest node (in terms of absolute difference in ASCII value) is the result.
  * 
  * Input:
  *   root       - the root of the BST
@@ -13,10 +48,16 @@
  * 
  * Returns:
  *   the pointer to the node, if found
+ *   the pointer to the closest node to <entity>, if not found.
  *   NULL, if not found
  */
 KB_NODE *search(KB_NODE *root, const char *entity)
 {
+
+    KB_NODE *closest_so_far = NULL;
+    int difference_so_far;
+    int curr_diff;
+
     bool done = false;
     while (!done)
     {
@@ -24,6 +65,10 @@ KB_NODE *search(KB_NODE *root, const char *entity)
         if (root == NULL)
         {
             done = true;
+            if (difference_so_far < 200)
+            {
+                root = closest_so_far;
+            }
         }
         // Found
         else if (compare_token(entity, root->entity) == 0)
@@ -33,11 +78,23 @@ KB_NODE *search(KB_NODE *root, const char *entity)
         // Greater than (traverse to right subtree)
         else if (compare_token(entity, root->entity) == 1)
         {
+            curr_diff = get_ascii_difference(entity, root->entity);
+            if (closest_so_far == NULL || curr_diff < difference_so_far)
+            {
+                difference_so_far = curr_diff;
+                closest_so_far = root;
+            }
             root = root->right_child;
         }
         // Less than (traverse to left subtree)
         else
         {
+            curr_diff = get_ascii_difference(entity, root->entity);
+            if (closest_so_far == NULL || curr_diff < difference_so_far)
+            {
+                difference_so_far = curr_diff;
+                closest_so_far = root;
+            }
             root = root->left_child;
         }
     }
@@ -72,7 +129,7 @@ KB_NODE *create_new_node(const char *entity, const char *response)
 }
 
 /* 
- * Inserts a new node with <entity> and <response> to the BST
+ * Inserts a new node with <entity> and <response> to the BST.
  * 
  * Input:
  *   entity     - the entity attribute of the new node
@@ -144,7 +201,7 @@ int insert(KB_NODE *root, const char *entity, const char *response)
 }
 
 /* 
- * Performs a recursive in-order traversal (for visualization and testing purposes)
+ * Performs a recursive in-order traversal (for visualization and testing purposes).
  * 
  * Input:
  *   root       - the root of the BST

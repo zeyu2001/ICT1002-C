@@ -63,7 +63,8 @@ KB_NODE **get_root(const char *intent)
  *
  * Returns:
  *   KB_OK, if a response was found for the intent and entity (the response is copied to the response buffer)
- *   KB_NOTFOUND, if no response could be found
+ *   KB_CLOSESTMATCH, if the entity is not found, but a closest match is found
+ *   KB_NOTFOUND, if no suitable response could be found
  *   KB_INVALID, if 'intent' is not a recognised question word
  */
 int knowledge_get(const char *intent, const char *entity, char *response, int n) {
@@ -83,6 +84,25 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
 	if (node == NULL)
 	{
 		return KB_NOTFOUND;
+	}
+
+	// Closest match
+	else if (get_ascii_difference(entity, node->entity) > 0)
+	{
+		char answer[MAX_INPUT];
+		prompt_user(answer, MAX_INPUT, "Sorry, I don't know %s is %s. Did you mean %s?", intent, entity, node->entity);
+		
+		// User accepts closest match
+		if (compare_token(answer, "yes") == 0 || compare_token(answer, "y") == 0)
+		{
+			snprintf(response, MAX_RESPONSE, "%s", node->response);
+			return KB_CLOSESTMATCH;
+		}
+		// User does not accept closest match
+		else
+		{
+			return KB_NOTFOUND;
+		}
 	}
 	else
 	{

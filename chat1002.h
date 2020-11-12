@@ -23,10 +23,11 @@
 #define MAX_RESPONSE 256
 
 /* return codes for knowledge_get() and knowledge_put() */
-#define KB_OK        0
-#define KB_NOTFOUND -1
-#define KB_INVALID  -2
-#define KB_NOMEM    -3
+#define KB_OK               0
+#define KB_CLOSESTMATCH     1
+#define KB_NOTFOUND        -1
+#define KB_INVALID         -2
+#define KB_NOMEM           -3
  
 /* functions defined in main.c */
 int compare_token(const char *token1, const char *token2);
@@ -71,6 +72,7 @@ KB_NODE *WHAT_root;
 KB_NODE *WHO_root;
 
 /* functions defined in bst.c */
+int get_ascii_difference(const char *str1, const char *str2);
 KB_NODE *search(KB_NODE *root, const char *entity);
 KB_NODE *create_new_node(const char *entity, const char *response);
 int insert(KB_NODE *root, const char *entity, const char *response);

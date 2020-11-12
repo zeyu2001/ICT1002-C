@@ -248,8 +248,8 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	}
 	else if (status == KB_NOTFOUND)
 	{
-		char input[MAX_RESPONSE];
-		prompt_user(input, MAX_RESPONSE, "%s", question);
+		char input[MAX_INPUT];
+		prompt_user(input, MAX_INPUT, "%s", question);
 		knowledge_put(inv[0], entity, input);
 
 		snprintf(response, MAX_RESPONSE, "%s", "Thank you.");
@@ -384,12 +384,12 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 		return 1;
 	} else if (compare_token("Tell", inv[0]) == 0){
 		int chosen_resp = rand() % 2;
-		char answer[MAX_RESPONSE];
-		memset(answer, 0, MAX_RESPONSE);
+		char answer[MAX_INPUT];
+		memset(answer, 0, MAX_INPUT);
 		if (compare_token("riddle", inv[inc-1]) == 0) {
 			switch(chosen_resp) {
 				case 0:
-					prompt_user(answer, MAX_RESPONSE, "When is a door not a door?");
+					prompt_user(answer, MAX_INPUT, "When is a door not a door?");
 					if (compare_token("When it is a jar", answer) != 0) {
 						snprintf(response, n, "Actually... the answer was 'when it is a jar'. HAHA!!!!!");
 					} else {
@@ -397,7 +397,7 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 					}
 					break;
 				case 1:
-					prompt_user(answer, MAX_RESPONSE, "Not chest or box is now discussed. Money can be held in it, but just as we test its metal, within it there is rust?");
+					prompt_user(answer, MAX_INPUT, "Not chest or box is now discussed. Money can be held in it, but just as we test its metal, within it there is rust?");
 					if (compare_token("Trust", answer) != 0) {
 						snprintf(response, n, "Actually... the answer was 'trust'. HAHA!!!!!");
 					} else {
