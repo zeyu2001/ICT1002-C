@@ -199,6 +199,48 @@ int chatbot_is_question(const char *intent) {
 
 }
 
+/* 
+ * From inv, get the entity. inv[1] may contain "is" or "are"; if so, it is skipped.
+ * The remainder of the words form the entity.
+ * 
+ * Returns
+ * 	 the entity, as a char array.
+ */
+char *get_entity(char *inv[])
+{
+	// Length of inv array
+	int length = 0;
+	while (inv[length] != NULL)
+	{
+		length++;
+	}
+
+	int i;
+
+	/* Craft Entity */
+	static char entity[MAX_ENTITY] = "";
+
+	// Only include inv[1] if it is not "is" or "are"
+	if (length >= 2 && !compare_token(inv[1], "is") && !compare_token(inv[1], "are"))
+	{
+		strcpy(entity, inv[1]);
+		strcat(entity, " ");
+		i = 2;
+	}
+	else if (length >= 3)
+	{
+		strcpy(entity, inv[2]);
+		i = 3;
+	}
+
+	while (i < length)
+	{
+		strcat(entity, " ");
+		strcat(entity, inv[i]);
+		i++;
+	}
+	return entity;
+}
 
 /*
  * Answer a question.
@@ -218,18 +260,8 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	/* TEST STUB */
 	knowledge_put("WHO", "Frank Guan", "Frank teaches the C section of ICT1002.");
 
-	// NOT IMPLEMENTED YET
+	char *entity = get_entity(inv);
 
-	//craft entity
-	char entity[MAX_ENTITY];
-	strcpy(entity, inv[2]);
-	int i = 3;
-	while (inv[i] != NULL)
-	{
-		strcat(entity, " ");
-		strcat(entity, inv[i]);
-		i++;
-	}
 	// craft question: 
 	// I don't know. INTENT is/are ENTITY.
 	char question[MAX_RESPONSE];
@@ -373,15 +405,44 @@ int chatbot_is_smalltalk(const char *intent) {
  *   1, if the chatbot should stop chatting (e.g. the smalltalk was "goodbye" etc.)
  */
 int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
+
 	if (compare_token("Hello", inv[0]) == 0) {
 		snprintf(response, n, "Hellooooooooo :)");
+
 	} else if (compare_token("It's", inv[0]) == 0){
-		snprintf(response, n, "That is so!");
+		int chosen_resp = rand() % 4;
+		char reflection[MAX_ENTITY];
+		if (inv[1] != NULL)
+		{
+			strcpy(reflection, inv[1]);
+		}
+		for (int i = 2; inv[i] != NULL; i++)
+		{
+			strcat(reflection, " ");
+			strcat(reflection, inv[i]);
+		}
+		switch(chosen_resp) {
+			case 0:
+				snprintf(response, n, "%s indeed!", reflection);
+				break;
+			case 1:
+				snprintf(response, n, "If I told you that it probably isn’t %s, what would you feel?", reflection);
+				break;
+			case 2:
+				snprintf(response, n, "It could well be that %s.", reflection);
+				break;
+			case 3:
+				snprintf(response, n, "You seem very certain.");
+				break;
+		}
+		
 	} else if (compare_token("Good", inv[0]) == 0){
 		snprintf(response, n, "Excellent %s", inv[1]);
+
 	} else if (compare_token("Goodbye", inv[0]) == 0){
 		snprintf(response, n, "Have an excellent day!");\
 		return 1;
+
 	} else if (compare_token("Tell", inv[0]) == 0){
 		int chosen_resp = rand() % 2;
 		char answer[MAX_INPUT];
