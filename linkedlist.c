@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "chat1002.h"
 
 /*
@@ -62,12 +63,13 @@ int insert_to_list(LIST_NODE **head, const char *entity, const char *response) {
  * Convert the linked list into a balanced BST
  * 
  * Input:
- *   n      - the size of the linked list
+ *   n              - the size of the linked list
+ *   mem_error      - set to true if there is a memory allocation failure
  * 
  * Returns:
  *   the root of the balanced BST
  */
-KB_NODE *convert_to_balanced_bst(LIST_NODE **head, int n) {
+KB_NODE *convert_to_balanced_bst(LIST_NODE **head, int n, bool *mem_error) {
     if (n <= 0) 
     {
         return NULL;
@@ -75,10 +77,14 @@ KB_NODE *convert_to_balanced_bst(LIST_NODE **head, int n) {
     
     // Recursively construct the left subtree (bottom-up)
     // Left subtree has n/2 nodes
-    KB_NODE *left_subtree = convert_to_balanced_bst(head, n/2);
+    KB_NODE *left_subtree = convert_to_balanced_bst(head, n/2, mem_error);
     
     // Create the root node
     KB_NODE *root = create_new_node((*head)->entity, (*head)->response);
+    if (root == NULL)
+    {
+        *mem_error = true;
+    }
 
     // Move to next node in the linked list
     // Note that
@@ -89,12 +95,12 @@ KB_NODE *convert_to_balanced_bst(LIST_NODE **head, int n) {
     
     // Recursively construct the right subtree (bottom up)
     // Right subtree has n (total) - n/2 (left subtree) - 1 (root) nodes
-    root->right_child = convert_to_balanced_bst(head, n - n/2 - 1);
+    root->right_child = convert_to_balanced_bst(head, n - n/2 - 1, mem_error);
     
     return root;
 }
 
-KB_NODE* balanced_bst(LIST_NODE *head) {
+KB_NODE* balanced_bst(LIST_NODE *head, bool *mem_error) {
     int n = 0;
     LIST_NODE *curr_node = head;
 
@@ -103,7 +109,7 @@ KB_NODE* balanced_bst(LIST_NODE *head) {
         n++;
         curr_node = curr_node->next_ptr;
     }
-    return convert_to_balanced_bst(&head, n);
+    return convert_to_balanced_bst(&head, n, mem_error);
 }
 
 /*

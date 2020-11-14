@@ -9,6 +9,7 @@
 #define _CHAT1002_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 /* the maximum number of characters we expect in a line of input (including the terminating null)  */
 #define MAX_INPUT    256
@@ -60,7 +61,8 @@ int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
 
 /* FOR TESTING ONLY: uncomment to 'fake' malloc and test memory allocation failures */
-//#define malloc(...) NULL
+//#define malloc(s) my_alloc(s)
+void *my_alloc(size_t s);
 
 /* BINARY SEARCH TREE
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -111,8 +113,8 @@ LIST_NODE *WHO_head;
 /* functions defined in linkedlist.c */
 int display_list(LIST_NODE *head);
 int insert_to_list(LIST_NODE **head, const char *entity, const char *response);
-KB_NODE *convert_to_balanced_bst(LIST_NODE **head, int n);
-KB_NODE *balanced_bst(LIST_NODE *head);
+KB_NODE *convert_to_balanced_bst(LIST_NODE **head, int n, bool *mem_error);
+KB_NODE *balanced_bst(LIST_NODE *head, bool *mem_error);
 void reset_list(LIST_NODE *head);
 int linkedlist_tests();
 

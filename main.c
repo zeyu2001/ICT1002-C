@@ -22,8 +22,13 @@ const char *delimiters = " ?\t\n";
  */
 int main(int argc, char *argv[]) {
 
-	bst_tests();				/* Uncomment to run tests on bst.c */
-	linkedlist_tests();		/* Uncomment to run tests on linkedlist.c */
+	/* 
+	 * Note that these tests do not check for memory allocation failures.
+	 * Do not run them together with #define malloc(s) my_alloc(s).
+	 */
+
+	//bst_tests();				/* Uncomment to run tests on bst.c */
+	//linkedlist_tests();		/* Uncomment to run tests on linkedlist.c */
 
 	/* Initialise the BST */
 	KB_NODE *WHAT_root, *WHERE_root, *WHO_root = NULL;

@@ -282,6 +282,7 @@ int knowledge_read(FILE *f) {
 
 			if (status != KB_OK)
 			{
+				fclose(f);
 				return status;
 			}
 
@@ -290,10 +291,18 @@ int knowledge_read(FILE *f) {
 		}
 	} 
 
+	fclose(f);
+
 	// Convert linked list to balanced BST
-	WHAT_root = balanced_bst(WHAT_head);
-	WHO_root = balanced_bst(WHO_head);
-	WHERE_root = balanced_bst(WHERE_head);
+	bool mem_error = false;
+	WHAT_root = balanced_bst(WHAT_head, &mem_error);
+	WHO_root = balanced_bst(WHO_head, &mem_error);
+	WHERE_root = balanced_bst(WHERE_head, &mem_error);
+
+	if (mem_error)
+	{
+		return KB_NOMEM;
+	}
 
 	// Linked list is no longer needed after conversion
 	reset_list(WHAT_head);
@@ -301,8 +310,6 @@ int knowledge_read(FILE *f) {
 	reset_list(WHERE_head);
 
 	WHAT_head = WHO_head = WHERE_head = NULL;
-
-	fclose(f);
 
 	return count;
 }

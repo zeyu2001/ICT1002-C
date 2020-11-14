@@ -208,7 +208,10 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
 		}
 		
 		// Successful
-		snprintf(response, MAX_RESPONSE, "Read %d responses from %s.", num_responses, filename);
+		else
+		{
+			snprintf(response, MAX_RESPONSE, "Read %d responses from %s.", num_responses, filename);
+		}
 	}
 
 	return 0;
