@@ -50,6 +50,8 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n);
 int chatbot_is_smalltalk(const char *intent);
 int chatbot_do_smalltalk(int inc, char *inv[], char *resonse, int n);
 
+char *get_entity(int inc, char *inv[]);
+
 /* functions defined in knowledge.c */
 int knowledge_get(const char *intent, const char *entity, char *response, int n);
 int knowledge_put(const char *intent, const char *entity, const char *response);
@@ -57,6 +59,11 @@ void knowledge_reset();
 int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
 
+/* FOR TESTING ONLY: uncomment to 'fake' malloc and test memory allocation failures */
+//#define malloc(...) NULL
+
+/* BINARY SEARCH TREE
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
 /* BST node */
 typedef struct node
 {
@@ -71,12 +78,42 @@ KB_NODE *WHERE_root;
 KB_NODE *WHAT_root;
 KB_NODE *WHO_root;
 
+/* the maximum ASCII difference to accept the closest match */
+#define MAX_DIFFERENCE  200
+
 /* functions defined in bst.c */
 int get_ascii_difference(const char *str1, const char *str2);
 KB_NODE *search(KB_NODE *root, const char *entity);
 KB_NODE *create_new_node(const char *entity, const char *response);
 int insert(KB_NODE *root, const char *entity, const char *response);
+int reset(KB_NODE *root);
+void reverse_in_order_write(KB_NODE *root, FILE *f);
 int in_order(KB_NODE *root);
 int bst_tests();
+
+void put_padding (char ch, int n);
+void print_tree (struct node *root, int level);
+
+/* LINKED LIST
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+typedef struct list_node
+{
+    char entity[MAX_ENTITY];        // the entity (key for the sorted linked list)
+    char response[MAX_RESPONSE];    // the response for this entity
+    struct list_node *next_ptr;     // ptr to the next node 
+} LIST_NODE;
+
+/* head pointers for WHERE, WHAT and WHO lists */
+LIST_NODE *WHERE_head;
+LIST_NODE *WHAT_head;
+LIST_NODE *WHO_head;
+
+/* functions defined in linkedlist.c */
+int display_list(LIST_NODE *head);
+int insert_to_list(LIST_NODE **head, const char *entity, const char *response);
+KB_NODE *convert_to_balanced_bst(LIST_NODE **head, int n);
+KB_NODE *balanced_bst(LIST_NODE *head);
+void reset_list(LIST_NODE *head);
+int linkedlist_tests();
 
 #endif

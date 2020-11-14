@@ -19,22 +19,37 @@
  */
 int get_ascii_difference(const char *str1, const char *str2)
 {
-    int str1_ascii = 0;
-    int str2_ascii = 0;
+    int difference = 0;
 
     int i = 0;
-    while(str1[i] != '\0')
-    {
-        str1_ascii += (int) tolower(str1[i++]);
-    }
-
     int j = 0;
-    while(str2[j] != '\0')
+
+    while (str1[i] != '\0' && str2[j] != '\0')
     {
-        str2_ascii += (int) tolower(str2[j++]);
+        if (str1[i] != str2[j])
+        {
+            // Add ASCII differece if characters are different
+            difference += abs(tolower(str1[i]) - tolower(str2[i]));
+        }
+
+        i++;
+        j++;
     }
 
-    return abs(str1_ascii - str2_ascii);
+    // Now only either str1 or str2 still has characters left to read.
+    // Add the remaining characters as ASCII difference.
+
+    while (str1[i] != '\0')
+    {
+        difference += (int) tolower(str1[i++]);
+    }
+
+    while (str2[j] != '\0')
+    {
+        difference += (int) tolower(str2[j++]);
+    }
+
+    return difference;
 }
 
 
@@ -65,7 +80,7 @@ KB_NODE *search(KB_NODE *root, const char *entity)
         if (root == NULL)
         {
             done = true;
-            if (difference_so_far < 200)
+            if (difference_so_far < MAX_DIFFERENCE)
             {
                 root = closest_so_far;
             }
@@ -116,6 +131,12 @@ KB_NODE *create_new_node(const char *entity, const char *response)
 {
     KB_NODE *new_node;
     new_node = malloc(sizeof(struct node));
+     
+    // Memory allocation failure
+    if (new_node == NULL)
+    {
+        return NULL;
+    }
 
     /* Set the entity and response attributes */
     strcpy(new_node->entity, entity);
@@ -199,6 +220,49 @@ int insert(KB_NODE *root, const char *entity, const char *response)
     }
     return status;
 }
+/*
+ * Recursively clear the contents of the BST
+ * 
+ * Input
+ *   root       - the root of the BST
+ */
+int reset(KB_NODE *root) 
+{
+    // Recursively traverse left subtree
+    if (root->left_child != NULL)
+    {
+        reset(root->left_child);
+    }
+    // Recursively traverse right subtree
+    if (root->right_child != NULL)
+    {
+        reset(root->right_child);
+    }
+
+    // Deallocate the memory previously allocated to the node
+    free(root);
+
+    return 0;
+}
+
+/* 
+ * Performs a recursive reverse in-order (descending order) write to file.
+ * 
+ * Input:
+ *   f          - the file to write to
+ */
+void reverse_in_order_write(KB_NODE *root, FILE *f)
+{
+    if (root != NULL) 
+        {
+            reverse_in_order_write(root->right_child, f);        // visiting right child
+            
+            // Write entity and response
+            fprintf(f, "%s=%s\n", root->entity, root->response);
+
+            reverse_in_order_write(root->left_child, f);         // visiting left child
+        }
+}
 
 /* 
  * Performs a recursive in-order traversal (for visualization and testing purposes).
@@ -217,6 +281,39 @@ int in_order(KB_NODE *root)
     return 0;
 }
 
+/* 
+ * Testing functions to print the tree to console.
+ * The root is printed as the leftmost item.
+ */
+void put_padding(char ch, int n) {
+    int i;
+  
+    for (i = 0; i < n; i++)
+        putchar(ch) ;
+}
+
+void print_tree(struct node *root, int level) {
+  
+    if (root == NULL) 
+    {
+        put_padding('\t', level * 3);
+        puts("~");
+    } 
+    else 
+    {
+        print_tree(root->right_child, level + 1);
+        put_padding('\t', level * 3);
+        printf("%s\n", root->entity);
+        print_tree(root->left_child, level + 1);
+    }
+}
+
+/* 
+ * Runs a series of test cases on bst.c
+ * 
+ * NOTE: this function does not check for memory allocation failures.
+ * When 'faking' mallocs for testing purposes, do not run this function.
+ */
 int bst_tests()
 {
     printf("== BEGIN bst.c TESTS ==\n\n");
@@ -230,7 +327,6 @@ int bst_tests()
                       \       /      \
                    ICT1002  ICT1005  SIT
     */
-    KB_NODE *WHAT_root;
     WHAT_root = create_new_node("ICT1003", "Computer Organisation and Architecture.");
     insert(WHAT_root, "ICT1001", "Introduction to ICT.");
     insert(WHAT_root, "ICT1002", "Programming Fundamentals.");
@@ -238,7 +334,7 @@ int bst_tests()
     insert(WHAT_root, "SIT", "SIT is an autonomous university in Singapore.");
     insert(WHAT_root, "ICT1005", "Mathematics and Statistics for ICT.");
     
-    printf("-- In-order Traversal (WHAT):");
+    printf(" -- In-order Traversal (WHAT):");
     in_order(WHAT_root);
     printf("-- \n\n");
 
@@ -248,7 +344,6 @@ int bst_tests()
     KB_NODE *WHAT_SIT = search(WHAT_root, "SIT");
     printf("Entity: %s, Response: %s\n\n", WHAT_SIT->entity, WHAT_SIT->response);
 
-    KB_NODE *WHO_root;
     WHO_root = create_new_node("Frank Guan", "Frank teaches the C section of ICT1002.");
     insert(WHO_root, "Wang Zhengkui", "Zhengkui teaches the Python section of ICT1002.");
     
@@ -258,6 +353,40 @@ int bst_tests()
 
     KB_NODE *WHO_Frank = search(WHO_root, "Frank Guan");
     printf("Entity: %s\nResponse: %s\n\n", WHO_Frank->entity, WHO_Frank->response);
+
+    printf("RESET\n\n");
+    knowledge_reset();
+
+    in_order(WHO_root);
+    in_order(WHAT_root);
+
+    printf("LOADING sample.sorted.ini\n");
+    knowledge_read(fopen("sample.sorted.ini", "r"));
+    printf("LOADED sample.sorted.ini\n\n");
+
+    printf(" \n-- WHAT TREE\n");
+    print_tree(WHAT_root, 0);
+
+    printf(" \n-- WHO TREE\n");
+	print_tree(WHO_root, 0);
+
+    printf(" \n-- WHERE TREE\n");
+	print_tree(WHERE_root, 0);
+
+    printf("\n -- In-order Traversal (WHO):");
+    in_order(WHO_root);
+    printf("-- \n\n");
+
+    printf(" -- In-order Traversal (WHAT):");
+    in_order(WHAT_root);
+    printf("-- \n\n");
+
+    printf(" -- In-order Traversal (WHERE):");
+    in_order(WHERE_root);
+    printf(" -- \n\n");
+
+    printf("RESET\n\n");
+    knowledge_reset();
 
     printf("== END bst.c TESTS ==\n\n");
     return 0;

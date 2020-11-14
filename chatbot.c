@@ -87,7 +87,7 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
 		snprintf(response, n, "");
 		return 0;
 	}
-	//printf("inv[0]: %s\n", inv[0]);
+
 	/* look for an intent and invoke the corresponding do_* function */
 	if (chatbot_is_exit(inv[0]))
 		return chatbot_do_exit(inc, inv, response, n);
@@ -174,7 +174,42 @@ int chatbot_is_load(const char *intent) {
  */
 int chatbot_do_load(int inc, char *inv[], char *response, int n) {
 
-	/* to be implemented */
+	FILE *in_file;
+	char *filename;
+
+	if (inc >= 3 && compare_token(inv[1], "from") == 0)
+	{
+		filename = inv[2];
+		in_file = fopen(inv[2], "r");
+	}
+	else if (inc >= 2)
+	{
+		filename = inv[1];
+		in_file = fopen(inv[1], "r");
+	}
+	else
+	{
+		snprintf(response, MAX_RESPONSE, "Please enter a filename.");
+	}
+	
+
+	if (in_file == NULL)
+	{
+		snprintf(response, MAX_RESPONSE, "File '%s' does not exist.", filename);
+	}
+	else
+	{
+		int num_responses = knowledge_read(in_file);
+
+		// Note that error codes are -ve, so this will not conflict with normal return values which are +ve
+		if (num_responses == KB_NOMEM)
+		{
+			snprintf(response, MAX_RESPONSE, "Memory allocation failure.");
+		}
+		
+		// Successful
+		snprintf(response, MAX_RESPONSE, "Read %d responses from %s.", num_responses, filename);
+	}
 
 	return 0;
 
@@ -204,36 +239,35 @@ int chatbot_is_question(const char *intent) {
  * The remainder of the words form the entity.
  * 
  * Returns
- * 	 the entity, as a char array.
+ * 	 the entity, as a char array, if valid input
+ * 	 NULL, if invalid input
  */
-char *get_entity(char *inv[])
+char *get_entity(int inc, char *inv[])
 {
-	// Length of inv array
-	int length = 0;
-	while (inv[length] != NULL)
-	{
-		length++;
-	}
-
 	int i;
 
 	/* Craft Entity */
 	static char entity[MAX_ENTITY] = "";
 
 	// Only include inv[1] if it is not "is" or "are"
-	if (length >= 2 && !compare_token(inv[1], "is") && !compare_token(inv[1], "are"))
+	if (inc >= 2 && compare_token(inv[1], "is") != 0 && compare_token(inv[1], "are") != 0)
 	{
 		strcpy(entity, inv[1]);
-		strcat(entity, " ");
 		i = 2;
 	}
-	else if (length >= 3)
+	// Exclude inv[1] otherwise
+	else if (inc >= 3)
 	{
 		strcpy(entity, inv[2]);
 		i = 3;
 	}
-
-	while (i < length)
+	// Invalid input, expected an entity
+	else
+	{
+		return NULL;
+	}
+	
+	while (i < inc)
 	{
 		strcat(entity, " ");
 		strcat(entity, inv[i]);
@@ -257,18 +291,26 @@ char *get_entity(char *inv[])
  */
 int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 
-	/* TEST STUB */
-	knowledge_put("WHO", "Frank Guan", "Frank teaches the C section of ICT1002.");
+	char *entity = get_entity(inc, inv);
+	if (entity == NULL)
+	{
+		snprintf(response, MAX_RESPONSE, "Please provide an entity.");
+		return 0;
+	}
 
-	char *entity = get_entity(inv);
-
-	// craft question: 
-	// I don't know. INTENT is/are ENTITY.
+	// Craft question: 
+	// I don't know. INTENT is/are ENTITY?
 	char question[MAX_RESPONSE];
 	strcpy(question, "I don't know. ");
 	strcat(question, inv[0]);
-	strcat(question, " ");
-	strcat(question, inv[1]);
+
+	// Include 'is' / 'are' when reflecting the question back to the user
+	if (compare_token(inv[1], "is") == 0 || compare_token(inv[1], "are") == 0)
+	{
+		strcat(question, " ");
+		strcat(question, inv[1]);
+	}
+
 	strcat(question, " ");
 	strcat(question, entity);
 	strcat(question, "?");
@@ -282,9 +324,17 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
 	{
 		char input[MAX_INPUT];
 		prompt_user(input, MAX_INPUT, "%s", question);
-		knowledge_put(inv[0], entity, input);
+		
+		status = knowledge_put(inv[0], entity, input);
 
-		snprintf(response, MAX_RESPONSE, "%s", "Thank you.");
+		if (status == KB_NOMEM)
+		{
+			snprintf(response, MAX_RESPONSE, "%s", "Memory allocation failure.");
+		}
+		else
+		{
+			snprintf(response, MAX_RESPONSE, "%s", "Thank you.");
+		}
 	}
 	return 0;
 }
@@ -301,11 +351,7 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_reset(const char *intent) {
-
 	return compare_token(intent, "reset") == 0;
-
-	return 0;
-
 }
 
 
@@ -316,18 +362,13 @@ int chatbot_is_reset(const char *intent) {
  * function is used.
  *
  * Returns:
- *   0 (the chatbot always continues chatting after beign reset)
+ *   0 (the chatbot always continues chatting after reset)
  */
 int chatbot_do_reset(int inc, char *inv[], char *response, int n) {
 
-	if (chatbot_is_reset(inv[0]))
-	{
-		return 0;
-	}
-	else
-	{
-		printf("Resetting");
-	}
+	knowledge_reset();
+	snprintf(response, MAX_RESPONSE, "%s", "Reset successful.");
+
 	return 0;
 
 }
@@ -347,8 +388,6 @@ int chatbot_is_save(const char *intent) {
 
 	return compare_token(intent, "save") == 0;
 
-	return 0;
-
 }
 
 
@@ -363,7 +402,26 @@ int chatbot_is_save(const char *intent) {
  */
 int chatbot_do_save(int inc, char *inv[], char *response, int n) {
 
-	// thank the user, you fool
+	FILE *out_file;
+	char *filename;
+
+	if (inc >= 3 && (compare_token(inv[1], "to") || compare_token(inv[1], "as")) == 0)
+	{
+		filename = inv[2];
+		out_file = fopen(inv[2], "w");
+	}
+	else if (inc >= 2)
+	{
+		filename = inv[1];
+		out_file = fopen(inv[1], "w");
+	}
+	else
+	{
+		snprintf(response, MAX_RESPONSE, "Please enter a filename.");
+	}
+
+	knowledge_write(out_file);
+
 	snprintf(response, MAX_RESPONSE, "%s", "Thank you.");
 
 	return 0;

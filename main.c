@@ -22,8 +22,10 @@ const char *delimiters = " ?\t\n";
  */
 int main(int argc, char *argv[]) {
 
-	/* Initialise the BST */
 	bst_tests();				/* Uncomment to run tests on bst.c */
+	linkedlist_tests();		/* Uncomment to run tests on linkedlist.c */
+
+	/* Initialise the BST */
 	KB_NODE *WHAT_root, *WHERE_root, *WHO_root = NULL;
 	
 	/* Initialize the pseudo-RNG */

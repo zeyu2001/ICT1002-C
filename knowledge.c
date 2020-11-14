@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include "chat1002.h"
 
 /*
@@ -25,7 +26,7 @@
  * 
  * Returns:
  * 	 the root of the BST corresponding to the intent, if valid
- *   KB_INVALID, if 'intent' is not a recognised question word
+ *   NULL, if 'intent' is not a recognised question word
  */
 KB_NODE **get_root(const char *intent)
 {
@@ -51,6 +52,39 @@ KB_NODE **get_root(const char *intent)
 	return root;
 }
 
+/*
+ * Get the head of the relevant linked list, given the intent.
+ * 
+ * Input:
+ * 	 intent		- the question word
+ * 
+ * Returns:
+ * 	 the root of the BST corresponding to the intent, if valid
+ *   NULL, if 'intent' is not a recognised question word
+ */
+LIST_NODE **get_head(const char *intent)
+{
+	LIST_NODE **head;
+
+	if (compare_token(intent, "WHERE") == 0)
+	{	
+		head = &WHERE_head;
+	}
+	else if (compare_token(intent, "WHAT") == 0)
+	{
+		head = &WHAT_head;
+	}
+	else if (compare_token(intent, "WHO") == 0)
+	{
+		head = &WHO_head;
+	}
+	else
+	{
+		// Not a valid question word
+		head = NULL;
+	}
+	return head;
+}
 
 /*
  * Get the response to a question.
@@ -86,11 +120,11 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
 		return KB_NOTFOUND;
 	}
 
-	// Closest match
+	// Closest match found
 	else if (get_ascii_difference(entity, node->entity) > 0)
 	{
 		char answer[MAX_INPUT];
-		prompt_user(answer, MAX_INPUT, "Sorry, I don't know %s is %s. Did you mean %s?", intent, entity, node->entity);
+		prompt_user(answer, MAX_INPUT, "Sorry, I don't know about %s. Did you mean %s? (yes/no)", entity, node->entity);
 		
 		// User accepts closest match
 		if (compare_token(answer, "yes") == 0 || compare_token(answer, "y") == 0)
@@ -99,11 +133,21 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
 			return KB_CLOSESTMATCH;
 		}
 		// User does not accept closest match
-		else
+		else if (compare_token(answer, "no") == 0 || compare_token(answer, "n") == 0)
 		{
+			// Calling function will prompt the user to provide knowledge
 			return KB_NOTFOUND;
 		}
+		// Invalid input
+		else 
+		{
+			snprintf(response, MAX_RESPONSE, "I dont understand '%s'", answer);
+
+			// Ends the current transaction
+			return KB_CLOSESTMATCH;
+		}
 	}
+	// Found
 	else
 	{
 		snprintf(response, MAX_RESPONSE, "%s", node->response);
@@ -123,7 +167,7 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
  *   response  - the response for this question and entity
  *
  * Returns:
- *   KB_FOUND, if successful
+ *   KB_OK, if successful
  *   KB_NOMEM, if there was a memory allocation failure
  *   KB_INVALID, if the intent is not a valid question word
  */
@@ -142,6 +186,12 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
 	if (*root == NULL)
 	{
 		*root = create_new_node(entity, response);
+
+		// Memory allocation failure
+		if (*root == NULL)
+		{
+			return KB_NOMEM;
+		}
 	}
 
 	// Non-empty tree (insert new node into BST)
@@ -158,25 +208,123 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
  * Read a knowledge base from a file.
  *
  * Input:
- *   f - the file
+ *   f 				- the file
+ *	 response 		- the response buffer for error reporting
  *
- * Returns: the number of entity/response pairs successful read from the file
+ * Returns: 
+ * 	 the number of entity/response pairs successful read from the file,
+ * 	 or KB_NOMEM if there was a memory allocation failure
  */
 int knowledge_read(FILE *f) {
+	
+	// Assume that no line of the file is longer than 
+	// MAX_ENTITY + 1 + MAX_RESPONSE + 1 characters
 
-	/* to be implemented */
+	int buff_size = MAX_ENTITY + 1 + MAX_RESPONSE + 1;
 
-	return 0;
+	char line[buff_size];
+	int line_length;
+
+	int count = 0;
+
+	char entity[MAX_ENTITY];
+	char response[MAX_RESPONSE];
+	int status;
+
+	// The longest intent is WHERE, which is 5 characters long
+	char section_name[6] = "";
+	bool valid_section = false;
+
+	// Read from file
+	while (fgets(line, buff_size, f) != NULL) 
+	{ 
+		// Account for "\r\n" at end of line
+		line[strcspn(line, "\r\n")] = 0;
+		line_length = strlen(line);
+
+		// Empty line
+		if (line_length == '\0' && line[0] == '\n') {
+			// Ignore
+        	continue;
+    	}
+
+		// Get section heading
+		if (line[0] == '[' && line[line_length - 1] == ']')
+		{
+			snprintf(section_name, 6, "%s", strtok(line + 1, "]"));
+			if (chatbot_is_question(section_name))
+			{
+				valid_section = true;
+			}
+			// Ignore anything after ']'
+			continue;
+		}
+
+		// If the file contains a section heading that does not correspond 
+		// to an intent understood by the chatbot, the whole section should 
+		// be ignored
+		if (valid_section)
+		{
+			// Lines that do not contain either '=' or square brackets should be ignored
+			if (strchr(line, '=') == NULL)
+			{
+				continue;
+			}
+
+			// Extract entity from '=' delimiter
+			snprintf(entity, MAX_ENTITY, "%s", strtok(line, "="));
+			// Extract response after '=' and before "\r\n"
+			snprintf(response, MAX_RESPONSE, "%s", strtok(NULL, "\r\n"));
+
+			// Insert entity-response pair into linked list
+			LIST_NODE **head = get_head(section_name);
+			status = insert_to_list(head, entity, response);
+
+			if (status != KB_OK)
+			{
+				return status;
+			}
+
+			// Count number of entity-response pairs
+			count++;
+		}
+	} 
+
+	// Convert linked list to balanced BST
+	WHAT_root = balanced_bst(WHAT_head);
+	WHO_root = balanced_bst(WHO_head);
+	WHERE_root = balanced_bst(WHERE_head);
+
+	// Linked list is no longer needed after conversion
+	reset_list(WHAT_head);
+	reset_list(WHO_head);
+	reset_list(WHERE_head);
+
+	WHAT_head = WHO_head = WHERE_head = NULL;
+
+	fclose(f);
+
+	return count;
 }
 
 
 /*
- * Reset the knowledge base, removing all know entitities from all intents.
+ * Reset the knowledge base, removing all known entities from all intents.
  */
 void knowledge_reset() {
-
-	/* to be implemented */
-
+	if (WHAT_root != NULL)
+	{
+		reset(WHAT_root);
+	}
+	if (WHERE_root != NULL)
+	{
+		reset(WHERE_root);
+	}
+	if (WHO_root != NULL)
+	{
+		reset(WHO_root);
+	}
+	WHAT_root = WHERE_root = WHO_root = NULL;
 }
 
 
@@ -188,6 +336,14 @@ void knowledge_reset() {
  */
 void knowledge_write(FILE *f) {
 
-	/* to be implemented */
+	fprintf(f, "[what]\n");
+	reverse_in_order_write(WHAT_root, f);
 
+	fprintf(f, "\n[where]\n");
+	reverse_in_order_write(WHERE_root, f);
+
+	fprintf(f, "\n[who]\n");
+	reverse_in_order_write(WHO_root, f);
+
+	fclose(f);
 }
