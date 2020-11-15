@@ -130,7 +130,7 @@ KB_NODE *search(KB_NODE *root, const char *entity)
 KB_NODE *create_new_node(const char *entity, const char *response)
 {
     KB_NODE *new_node;
-    new_node = malloc(sizeof(struct node));
+    new_node = malloc(sizeof(KB_NODE));
      
     // Memory allocation failure
     if (new_node == NULL)
@@ -292,7 +292,7 @@ void put_padding(char ch, int n) {
         putchar(ch) ;
 }
 
-void print_tree(struct node *root, int level) {
+void print_tree(KB_NODE *root, int level) {
   
     if (root == NULL) 
     {

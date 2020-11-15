@@ -408,7 +408,7 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
 	FILE *out_file;
 	char *filename;
 
-	if (inc >= 3 && (compare_token(inv[1], "to") || compare_token(inv[1], "as")) == 0)
+	if (inc >= 3 && (compare_token(inv[1], "to") == 0 || compare_token(inv[1], "as") == 0))
 	{
 		filename = inv[2];
 		out_file = fopen(inv[2], "w");
