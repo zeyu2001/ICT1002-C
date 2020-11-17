@@ -487,7 +487,7 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 				snprintf(response, n, "%s indeed!", reflection);
 				break;
 			case 1:
-				snprintf(response, n, "If I told you that it probably isn’t %s, what would you feel?", reflection);
+				snprintf(response, n, "If I told you that it probably isn't %s, what would you feel?", reflection);
 				break;
 			case 2:
 				snprintf(response, n, "It could well be that %s.", reflection);
