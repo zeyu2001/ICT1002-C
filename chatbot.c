@@ -53,7 +53,7 @@
  */
 const char *chatbot_botname() {
 
-	return "Chatbot";
+	return "Marc";
 
 }
 
@@ -84,7 +84,23 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
 
 	/* check for empty input */
 	if (inc < 1) {
-		snprintf(response, n, "");
+
+		int chosen_resp = rand() % 4;
+
+		switch(chosen_resp) {
+			case 0:
+				snprintf(response, n, "Awkward...");
+				break;
+			case 1:
+				snprintf(response, n, "Try asking me to tell you a riddle.");
+				break;
+			case 2:
+				snprintf(response, n, "Try asking me a question.");
+				break;
+			case 3:
+				snprintf(response, n, "Try asking me to tell you a joke.");
+				break;
+		}
 		return 0;
 	}
 
@@ -449,11 +465,52 @@ int chatbot_is_smalltalk(const char *intent) {
 
 	return compare_token("Hello", intent) == 0 ||
 		compare_token("It's", intent) == 0 ||
+		compare_token("I'm", intent) == 0 ||
+		compare_token("You're", intent) == 0 ||
+		compare_token("Yes", intent) == 0 ||
+		compare_token("No", intent) == 0 ||
 		compare_token("Good", intent) == 0 ||
 		compare_token("Goodbye", intent) == 0 ||
 		compare_token("Tell", intent) == 0;
 }
 
+/*
+ * Reflects the user's message back at them. 
+ */
+
+int get_reflection(char *reflection, char *inv[], int inc)
+{
+	if (inc >= 2)
+		{
+			strcpy(reflection, inv[1]);
+		}
+		for (int i = 2; i < inc; i++)
+		{
+			strcat(reflection, " ");
+
+			// Speak from perspective of the chatbot
+			if (compare_token(inv[i], "am") == 0) { strcat(reflection, "are"); } 
+			else if (compare_token(inv[i], "was") == 0) { strcat(reflection, "were"); } 
+			else if (compare_token(inv[i], "i") == 0) { strcat(reflection, "you"); } 
+			else if (compare_token(inv[i], "i'd") == 0) { strcat(reflection, "you'd"); } 
+			else if (compare_token(inv[i], "i've") == 0) { strcat(reflection, "you've"); } 
+			else if (compare_token(inv[i], "i'll") == 0) { strcat(reflection, "you'll"); } 
+			else if (compare_token(inv[i], "my") == 0) { strcat(reflection, "your"); } 
+			else if (compare_token(inv[i], "are") == 0) { strcat(reflection, "am"); } 
+			else if (compare_token(inv[i], "you've") == 0) { strcat(reflection, "I've"); } 
+			else if (compare_token(inv[i], "you'll") == 0) { strcat(reflection, "I'll"); } 
+			else if (compare_token(inv[i], "your") == 0) { strcat(reflection, "my"); } 
+			else if (compare_token(inv[i], "yours") == 0) { strcat(reflection, "mine"); } 
+			else if (compare_token(inv[i], "you") == 0) { strcat(reflection, "me"); } 
+			else if (compare_token(inv[i], "me") == 0) { strcat(reflection, "you"); } 
+			else
+			{
+				strcat(reflection, inv[i]);
+			}
+			
+		}
+	return 0;
+}
 
 /*
  * Respond to smalltalk.
@@ -473,15 +530,9 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 	} else if (compare_token("It's", inv[0]) == 0){
 		int chosen_resp = rand() % 4;
 		char reflection[MAX_ENTITY];
-		if (inv[1] != NULL)
-		{
-			strcpy(reflection, inv[1]);
-		}
-		for (int i = 2; inv[i] != NULL; i++)
-		{
-			strcat(reflection, " ");
-			strcat(reflection, inv[i]);
-		}
+		
+		get_reflection(reflection, inv, inc);
+
 		switch(chosen_resp) {
 			case 0:
 				snprintf(response, n, "%s indeed!", reflection);
@@ -490,15 +541,99 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 				snprintf(response, n, "If I told you that it probably isn't %s, what would you feel?", reflection);
 				break;
 			case 2:
-				snprintf(response, n, "It could well be that %s.", reflection);
+				snprintf(response, n, "It could well be that it's %s.", reflection);
 				break;
 			case 3:
 				snprintf(response, n, "You seem very certain.");
 				break;
 		}
+
+	} else if (compare_token("I'm", inv[0]) == 0){
+		int chosen_resp = rand() % 4;
+		char reflection[MAX_ENTITY];
 		
+		get_reflection(reflection, inv, inc);
+
+		switch(chosen_resp) {
+			case 0:
+				snprintf(response, n, "How does being %s make you feel?", reflection);
+				break;
+			case 1:
+				snprintf(response, n, "Do you enjoy being %s?", reflection);
+				break;
+			case 2:
+				snprintf(response, n, "Why do you tell me you’re %s?", reflection);
+				break;
+			case 3:
+				snprintf(response, n, "Why do you think you’re %s?", reflection);
+				break;
+		}
+
+	} else if (compare_token("You're", inv[0]) == 0){
+		int chosen_resp = rand() % 4;
+		char reflection[MAX_ENTITY];
+		
+		get_reflection(reflection, inv, inc);
+
+		switch(chosen_resp) {
+			case 0:
+				snprintf(response, n, "Why do you think I am %s?", reflection);
+				break;
+			case 1:
+				snprintf(response, n, "Does it please you to think that I’m %s?", reflection);
+				break;
+			case 2:
+				snprintf(response, n, "Perhaps you would like me to be %s.", reflection);
+				break;
+			case 3:
+				snprintf(response, n, "Are we talking about you, or me?");
+				break;
+		}
+
+	} else if (compare_token("Yes", inv[0]) == 0){
+
+		int chosen_resp = rand() % 4;
+
+		switch(chosen_resp) {
+			case 0:
+				snprintf(response, n, "You seem quite sure.");
+				break;
+			case 1:
+				snprintf(response, n, "I think so too!");
+				break;
+			case 2:
+				snprintf(response, n, "Indeed.");
+				break;
+			case 3:
+				snprintf(response, n, "I see.");
+				break;
+		}
+
+	} else if (compare_token("No", inv[0]) == 0){
+
+		int chosen_resp = rand() % 4;
+
+		switch(chosen_resp) {
+			case 0:
+				snprintf(response, n, "You seem quite sure.");
+				break;
+			case 1:
+				snprintf(response, n, "Oh.");
+				break;
+			case 2:
+				snprintf(response, n, "I thought so too.");
+				break;
+			case 3:
+				snprintf(response, n, "I see.");
+				break;
+		}
+
 	} else if (compare_token("Good", inv[0]) == 0){
-		snprintf(response, n, "Excellent %s", inv[1]);
+
+		char reflection[MAX_ENTITY];
+		get_reflection(reflection, inv, inc);
+
+		snprintf(response, n, "Excellent %s", reflection);
 
 	} else if (compare_token("Goodbye", inv[0]) == 0){
 		snprintf(response, n, "Have an excellent day!");\

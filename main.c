@@ -30,8 +30,9 @@ int main(int argc, char *argv[]) {
 	//bst_tests();				/* Uncomment to run tests on bst.c */
 	//linkedlist_tests();		/* Uncomment to run tests on linkedlist.c */
 
-	/* Initialise the BST */
+	/* Initialise the BST and Linked List */
 	KB_NODE *WHAT_root, *WHERE_root, *WHO_root = NULL;
+	LIST_NODE *WHAT_head, *WHERE_head, *WHO_head = NULL;
 	
 	/* Initialize the pseudo-RNG */
 	srand(time(NULL));			/* Seed with time of execution */
@@ -54,29 +55,31 @@ int main(int argc, char *argv[]) {
 	/* main command loop */
 	do {
 
-		do {
-			
-			/* read the line */
-			printf("%s: ", chatbot_username());
-			fgets(input, MAX_INPUT, stdin);
+		/*
+		 * Note that empty inputs are handled in the chatbot_main() function
+		 * in chatbot.c, to allow responding with random hints / comments.
+		 */
 
-			/* split it into words */
-			inc = 0;
-			inv[inc] = strtok(input, delimiters);
-			while (inv[inc] != NULL) {
+		/* read the line */
+		printf("%s: ", chatbot_username());
+		fgets(input, MAX_INPUT, stdin);
 
-				/* remove trailing punctuation */
-				len = strlen(inv[inc]);
-				while (len > 0 && ispunct(inv[inc][len - 1])) {
-					inv[inc][len - 1] = '\0';
-					len--;
-				}
+		/* split it into words */
+		inc = 0;
+		inv[inc] = strtok(input, delimiters);
+		while (inv[inc] != NULL) {
 
-				/* go to the next word */
-				inc++;
-				inv[inc] = strtok(NULL, delimiters);
+			/* remove trailing punctuation */
+			len = strlen(inv[inc]);
+			while (len > 0 && ispunct(inv[inc][len - 1])) {
+				inv[inc][len - 1] = '\0';
+				len--;
 			}
-		} while (inc < 1);
+
+			/* go to the next word */
+			inc++;
+			inv[inc] = strtok(NULL, delimiters);
+		}
 
 		/* invoke the chatbot */
 		done = chatbot_main(inc, inv, output, MAX_RESPONSE);
