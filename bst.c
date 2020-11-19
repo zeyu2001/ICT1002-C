@@ -373,6 +373,19 @@ int bst_tests()
     printf(" \n-- WHERE TREE\n");
 	print_tree(WHERE_root, 0);
 
+    printf("LOADING sample.unsorted.ini\n");
+    knowledge_read(fopen("sample.unsorted.ini", "r"));
+    printf("LOADED sample.unsorted.ini\n\n");
+
+    printf(" \n-- WHAT TREE\n");
+    print_tree(WHAT_root, 0);
+
+    printf(" \n-- WHO TREE\n");
+	print_tree(WHO_root, 0);
+
+    printf(" \n-- WHERE TREE\n");
+	print_tree(WHERE_root, 0);
+
     printf("\n -- In-order Traversal (WHO):");
     in_order(WHO_root);
     printf("-- \n\n");

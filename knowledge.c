@@ -205,7 +205,9 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
 
 
 /*
- * Read a knowledge base from a file.
+ * Read a knowledge base from a file. Note that if the file is sorted,
+ * creating a sorted linked list takes only O(n) time. Otherwise,
+ * an insertion sort is performed, increasing the time complexity.
  *
  * Input:
  *   f 				- the file

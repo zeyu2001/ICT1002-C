@@ -27,7 +27,7 @@ int display_list(LIST_NODE *head)
 }
 
 /* 
- * Insert a node into the linked list, in the first position
+ * Insert a node into the linked list, using insertion sort.
  * 
  * Input:
  *   entity     - the entity attribute of the new node
@@ -46,16 +46,33 @@ int insert_to_list(LIST_NODE **head, const char *entity, const char *response) {
     {
         return KB_NOMEM;
     }
-
+    
     strcpy(new_node->entity, entity);
     strcpy(new_node->response, response);
 
-    // Point the new node to the old head
-    new_node->next_ptr = *head;
+    // Perform insertion sort
+    LIST_NODE *curr_ptr = *head;
+    LIST_NODE *prev_ptr = NULL;
+    while (curr_ptr && compare_token(entity, curr_ptr->entity) == 1)
+    {
+        prev_ptr = curr_ptr;
+        curr_ptr = curr_ptr->next_ptr;
+    }
+    // Point the new node to the suitable next ptr
+    new_node->next_ptr = curr_ptr;
 
-    // Update the head
-    *head = new_node;
-
+    // Inserted at the first position in the list
+    if (curr_ptr == *head)
+    {
+        // Update the head
+        *head = new_node;
+    }
+    else
+    {
+        // Point the previous node to the new node
+        prev_ptr->next_ptr = new_node;
+    }
+    
     return KB_OK;
 }
 
