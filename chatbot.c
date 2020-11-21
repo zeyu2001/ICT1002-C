@@ -640,7 +640,7 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 		return 1;
 
 	} else if (compare_token("Tell", inv[0]) == 0){
-		int chosen_resp = rand() % 2;
+		int chosen_resp = rand() % 4;
 		char answer[MAX_INPUT];
 		memset(answer, 0, MAX_INPUT);
 		if (compare_token("riddle", inv[inc-1]) == 0) {
@@ -661,6 +661,25 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 						snprintf(response, n, "You are right! Excellent job!");
 					}
 					break;
+				case 2:
+					prompt_user(answer, MAX_INPUT, "The more you take, the more you leave behind. What am I?");
+					if (compare_token("Steps", answer) != 0) {
+						snprintf(response, n, "Actually... the answer was 'Footsteps'. HAHA!!!!!");
+					} else
+					{
+						snprintf(response, n, "You are right! Excellent job!");
+					}
+					break;
+				case 3:
+					prompt_user(answer, MAX_INPUT, "What belongs to you, but other people use it more than you?");
+					if (compare_token("Name", answer) != 0) {
+						snprintf(response, n, "Actually... the answer was 'Your name'. HAHA!!!!!");
+					} else
+					{
+						snprintf(response, n, "You are right! Excellent job!");
+					}
+					break;
+										
 			}
 		} else if (compare_token("joke", inv[inc-1]) == 0) {
 			switch(chosen_resp) {
@@ -670,9 +689,29 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 				case 1:
 					snprintf(response, n, "I was once asked what drove me to be a programmer. I replied, Grab.");
 					break;
+				case 2:
+					snprintf(response, n, "What is the best thing about Switzerland? I don't know, but the flag is a big plus.");
+					break;
+				case 3:
+					snprintf(response, n, "Why do we tell actors to break a leg? Because every play has a cast.");
+			}
+		} else if (compare_token("facts", inv[inc-1] == 0)) {
+			switch(chosen_resp) {
+				case 0:
+					snprintf(response, n, "Do you know that in 1986, Apple launched a clothing line?");
+					break;
+				case 1:
+					snprintf(response, n, "Do you know that Google rents out goats?");
+					break;
+				case 2:
+					snprintf(response, n, "Do you know that we breathe about 20000 times a day?");
+					break;
+				case 3:
+					snprintf(response, n, "Do you know that the first fast food restaurant is A&W?");
+					break;
 			}
 		} else {
-			snprintf(response, n, "Sorry, I can only tell you jokes or riddles!");
+			snprintf(response, n, "Sorry, I can only tell you jokes, riddles or facts!");
 		}
 	}
 	return 0;
