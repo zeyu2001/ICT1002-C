@@ -206,7 +206,8 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
 	}
 	else
 	{
-		snprintf(response, MAX_RESPONSE, "Please enter a filename.");
+		snprintf(response, MAX_RESPONSE, "Missing filename to load from.");
+		return 0;
 	}
 	
 
@@ -437,7 +438,8 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
 	}
 	else
 	{
-		snprintf(response, MAX_RESPONSE, "Please enter a filename.");
+		snprintf(response, MAX_RESPONSE, "Missing filename to save to.");
+		return 0;
 	}
 
 	knowledge_write(out_file);
@@ -463,6 +465,8 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
 int chatbot_is_smalltalk(const char *intent) {
 
 	return compare_token("Hello", intent) == 0 ||
+	    compare_token("Hi", intent) == 0 ||
+	    compare_token("Hey", intent) == 0 ||
 		compare_token("It's", intent) == 0 ||
 		compare_token("I'm", intent) == 0 ||
 		compare_token("You're", intent) == 0 ||
@@ -523,7 +527,7 @@ int get_reflection(char *reflection, char *inv[], int inc)
  */
 int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 
-	if (compare_token("Hello", inv[0]) == 0) {
+	if (compare_token("Hello", inv[0]) == 0 || compare_token("Hi", inv[0]) == 0 || compare_token("Hey", inv[0]) == 0) {
 		snprintf(response, n, "Hellooooooooo :)");
 
 	} else if (compare_token("It's", inv[0]) == 0){
@@ -635,7 +639,21 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 		snprintf(response, n, "Excellent %s", reflection);
 
 	} else if (compare_token("Goodbye", inv[0]) == 0){
-		snprintf(response, n, "Have an excellent day!");\
+
+	    int chosen_resp = rand() % 3;
+
+        switch(chosen_resp) {
+            case 0:
+                snprintf(response, n, "Have an excellent day!");
+                break;
+            case 1:
+                snprintf(response, n, "Goodbye!");
+                break;
+            case 2:
+                snprintf(response, n, "Catch ya later!");
+                break;
+        }
+
 		return 1;
 
 	} else if (compare_token("Tell", inv[0]) == 0){
