@@ -85,7 +85,7 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
 	/* check for empty input */
 	if (inc < 1) {
 
-		int chosen_resp = rand() % 4;
+		int chosen_resp = rand() % 5;
 
 		switch(chosen_resp) {
 			case 0:
@@ -100,6 +100,9 @@ int chatbot_main(int inc, char *inv[], char *response, int n) {
 			case 3:
 				snprintf(response, n, "Try asking me to tell you a joke.");
 				break;
+		    case 4:
+		        snprintf(response, n, "Try asking me to tell you a fact.");
+		        break;
 		}
 		return 0;
 	}
@@ -149,7 +152,7 @@ int chatbot_is_exit(const char *intent) {
  * function is used.
  *
  * Returns:
- *   0 (the chatbot always continues chatting after a question)
+ *   1 (the chatbot stops chatting after the intent is "exit" or "quit")
  */
 int chatbot_do_exit(int inc, char *inv[], char *response, int n) {
 
@@ -173,8 +176,6 @@ int chatbot_do_exit(int inc, char *inv[], char *response, int n) {
 int chatbot_is_load(const char *intent) {
 
 	return compare_token(intent, "load") == 0;
-
-	return 0;
 
 }
 
@@ -248,8 +249,6 @@ int chatbot_do_load(int inc, char *inv[], char *response, int n) {
 int chatbot_is_question(const char *intent) {
 
 	return compare_token(intent, "what") == 0 || compare_token(intent, "where") == 0 || compare_token(intent, "who") == 0;
-
-	return 1;
 
 }
 
@@ -370,7 +369,9 @@ int chatbot_do_question(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_reset(const char *intent) {
+
 	return compare_token(intent, "reset") == 0;
+
 }
 
 
@@ -441,7 +442,7 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
 
 	knowledge_write(out_file);
 
-	snprintf(response, MAX_RESPONSE, "%s", "Thank you.");
+	snprintf(response, MAX_RESPONSE, "My knowledge has been saved to %s.", filename);
 
 	return 0;
 
@@ -460,8 +461,6 @@ int chatbot_do_save(int inc, char *inv[], char *response, int n) {
  *  0, otherwise
  */
 int chatbot_is_smalltalk(const char *intent) {
-
-	/* to be implemented */
 
 	return compare_token("Hello", intent) == 0 ||
 		compare_token("It's", intent) == 0 ||
@@ -695,7 +694,7 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 				case 3:
 					snprintf(response, n, "Why do we tell actors to break a leg? Because every play has a cast.");
 			}
-		} else if (compare_token("facts", inv[inc-1] == 0)) {
+		} else if (compare_token("fact", inv[inc-1]) == 0) {
 			switch(chosen_resp) {
 				case 0:
 					snprintf(response, n, "Do you know that in 1986, Apple launched a clothing line?");
