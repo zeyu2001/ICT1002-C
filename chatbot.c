@@ -483,35 +483,36 @@ int chatbot_is_smalltalk(const char *intent) {
 
 int get_reflection(char *reflection, char *inv[], int inc)
 {
-	if (inc >= 2)
-		{
-			strcpy(reflection, inv[1]);
-		}
-		for (int i = 2; i < inc; i++)
+	strcpy(reflection, "");
+
+	for (int i = 1; i < inc; i++)
+	{
+		if (strlen(reflection) > 0)
 		{
 			strcat(reflection, " ");
-
-			// Speak from perspective of the chatbot
-			if (compare_token(inv[i], "am") == 0) { strcat(reflection, "are"); } 
-			else if (compare_token(inv[i], "was") == 0) { strcat(reflection, "were"); } 
-			else if (compare_token(inv[i], "i") == 0) { strcat(reflection, "you"); } 
-			else if (compare_token(inv[i], "i'd") == 0) { strcat(reflection, "you'd"); } 
-			else if (compare_token(inv[i], "i've") == 0) { strcat(reflection, "you've"); } 
-			else if (compare_token(inv[i], "i'll") == 0) { strcat(reflection, "you'll"); } 
-			else if (compare_token(inv[i], "my") == 0) { strcat(reflection, "your"); } 
-			else if (compare_token(inv[i], "are") == 0) { strcat(reflection, "am"); } 
-			else if (compare_token(inv[i], "you've") == 0) { strcat(reflection, "I've"); } 
-			else if (compare_token(inv[i], "you'll") == 0) { strcat(reflection, "I'll"); } 
-			else if (compare_token(inv[i], "your") == 0) { strcat(reflection, "my"); } 
-			else if (compare_token(inv[i], "yours") == 0) { strcat(reflection, "mine"); } 
-			else if (compare_token(inv[i], "you") == 0) { strcat(reflection, "me"); } 
-			else if (compare_token(inv[i], "me") == 0) { strcat(reflection, "you"); } 
-			else
-			{
-				strcat(reflection, inv[i]);
-			}
-			
 		}
+
+		// Speak from perspective of the chatbot
+		if (compare_token(inv[i], "am") == 0) { strcat(reflection, "are"); } 
+		else if (compare_token(inv[i], "was") == 0) { strcat(reflection, "were"); } 
+		else if (compare_token(inv[i], "i") == 0) { strcat(reflection, "you"); } 
+		else if (compare_token(inv[i], "i'd") == 0) { strcat(reflection, "you'd"); } 
+		else if (compare_token(inv[i], "i've") == 0) { strcat(reflection, "you've"); } 
+		else if (compare_token(inv[i], "i'll") == 0) { strcat(reflection, "you'll"); } 
+		else if (compare_token(inv[i], "my") == 0) { strcat(reflection, "your"); } 
+		else if (compare_token(inv[i], "are") == 0) { strcat(reflection, "am"); } 
+		else if (compare_token(inv[i], "you've") == 0) { strcat(reflection, "I've"); } 
+		else if (compare_token(inv[i], "you'll") == 0) { strcat(reflection, "I'll"); } 
+		else if (compare_token(inv[i], "your") == 0) { strcat(reflection, "my"); } 
+		else if (compare_token(inv[i], "yours") == 0) { strcat(reflection, "mine"); } 
+		else if (compare_token(inv[i], "you") == 0) { strcat(reflection, "me"); } 
+		else if (compare_token(inv[i], "me") == 0) { strcat(reflection, "you"); } 
+		else
+		{
+			strcat(reflection, inv[i]);
+		}
+		
+	}
 	return 0;
 }
 
@@ -680,7 +681,7 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 					break;
 				case 2:
 					prompt_user(answer, MAX_INPUT, "The more you take, the more you leave behind. What am I?");
-					if (compare_token("Steps", answer) != 0) {
+					if (compare_token("Footsteps", answer) != 0) {
 						snprintf(response, n, "Actually... the answer was 'Footsteps'. HAHA!!!!!");
 					} else
 					{
@@ -689,7 +690,7 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 					break;
 				case 3:
 					prompt_user(answer, MAX_INPUT, "What belongs to you, but other people use it more than you?");
-					if (compare_token("Name", answer) != 0) {
+					if (compare_token("Your name", answer) != 0) {
 						snprintf(response, n, "Actually... the answer was 'Your name'. HAHA!!!!!");
 					} else
 					{
