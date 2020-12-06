@@ -566,10 +566,10 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 				snprintf(response, n, "Do you enjoy being %s?", reflection);
 				break;
 			case 2:
-				snprintf(response, n, "Why do you tell me you’re %s?", reflection);
+				snprintf(response, n, "Why do you tell me you're %s?", reflection);
 				break;
 			case 3:
-				snprintf(response, n, "Why do you think you’re %s?", reflection);
+				snprintf(response, n, "Why do you think you're %s?", reflection);
 				break;
 		}
 
@@ -584,7 +584,7 @@ int chatbot_do_smalltalk(int inc, char *inv[], char *response, int n) {
 				snprintf(response, n, "Why do you think I am %s?", reflection);
 				break;
 			case 1:
-				snprintf(response, n, "Does it please you to think that I’m %s?", reflection);
+				snprintf(response, n, "Does it please you to think that I'm %s?", reflection);
 				break;
 			case 2:
 				snprintf(response, n, "Perhaps you would like me to be %s.", reflection);
